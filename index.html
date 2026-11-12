@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f7fb">
+  <title>Careerly — 자기소개서 프로젝트 관리</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      --ink: #20233a;
+      --muted: #898da3;
+      --line: #ececf3;
+      --purple: #7658e8;
+      --purple-dark: #6142d3;
+      --purple-pale: #f1edff;
+      --green: #23896c;
+      --green-pale: #e8f7f1;
+      --orange: #e59945;
+      --orange-pale: #fff4e8;
+      --red: #d65b69;
+      --surface: #fff;
+      --canvas: #f7f7fb;
+      --shadow: 0 8px 28px rgba(32, 35, 58, .045);
+      font-family: "DM Sans", "Noto Sans KR", sans-serif;
+      color: var(--ink);
+      background: var(--canvas);
+      font-synthesis: none;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 360px; min-height: 100vh; }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    .app { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 244px; flex: 0 0 244px; padding: 28px 17px 20px;
+      border-right: 1px solid var(--line); background: #fff;
+      display: flex; flex-direction: column; position: relative; z-index: 3;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 0 12px 35px; }
+    .brand-mark {
+      height: 34px; width: 34px; border-radius: 11px; display: grid; place-items: center;
+      color: white; font-weight: 800; font-size: 19px;
+      background: linear-gradient(145deg, #9b7cf6, #6849dc); box-shadow: 0 5px 12px #7658e83b;
+    }
+    .brand-name { font: 800 19px Manrope, sans-serif; letter-spacing: -.8px; }
+    .brand-name span { color: var(--purple); }
+    .workspace-label { padding: 0 12px; color: #a4a6b7; font-size: 10px; font-weight: 700; letter-spacing: 1.15px; }
+    .nav { display: grid; gap: 5px; margin-top: 12px; }
+    .nav-item {
+      border: 0; background: transparent; color: #777b91; border-radius: 10px;
+      display: flex; align-items: center; gap: 12px; padding: 11px 12px;
+      text-align: left; font-size: 13px; font-weight: 600; transition: .18s ease;
+    }
+    .nav-item:hover { background: #f7f6fc; color: var(--ink); }
+    .nav-item.active { color: var(--purple); background: var(--purple-pale); }
+    .nav-icon { width: 18px; height: 18px; font-size: 17px; display: inline-grid; place-items: center; }
+    .nav-badge { margin-left: auto; font-size: 10px; color: #9a8ad5; background: #e9e3ff; border-radius: 5px; padding: 3px 6px; }
+    .side-bottom { margin-top: auto; }
+    .credit-box { padding: 16px; border-radius: 13px; background: #f8f6ff; border: 1px solid #eeebfc; }
+    .credit-top { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #79758d; }
+    .credit-count { font: 700 14px Manrope, sans-serif; color: var(--ink); }
+    .credit-count span { color: #9998a9; font-size: 10px; font-weight: 500; }
+    .credit-track { height: 5px; background: #e7e2f5; border-radius: 8px; margin: 11px 0 10px; overflow: hidden; }
+    .credit-track span { display: block; width: 68%; height: 100%; background: linear-gradient(90deg, #a288f4, #7658e8); border-radius: inherit; }
+    .credit-note { color: #9997aa; font-size: 10px; }
+    .user-box { display: flex; align-items: center; gap: 10px; margin: 20px 4px 0; padding: 13px 8px 0; border-top: 1px solid var(--line); }
+    .avatar { flex: 0 0 auto; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; color: #795ce0; background: #eee9ff; font-size: 12px; font-weight: 700; }
+    .user-name { font-size: 12px; font-weight: 700; }
+    .user-sub { color: var(--muted); font-size: 10px; margin-top: 3px; }
+    .user-more { margin-left: auto; color: #9b9cad; }
+    .main { flex: 1; min-width: 0; }
+    .topbar {
+      height: 73px; padding: 0 42px; display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--line); background: rgba(255,255,255,.82);
+    }
+    .breadcrumb { color: var(--muted); font-size: 12px; }
+    .breadcrumb strong { color: var(--ink); font-weight: 600; }
+    .top-actions { display: flex; align-items: center; gap: 18px; }
+    .icon-button { border: 0; padding: 7px; color: #86899e; background: transparent; font-size: 17px; position: relative; }
+    .notification-dot { width: 5px; height: 5px; background: #ed7d8b; border: 1px solid #fff; border-radius: 50%; position: absolute; top: 5px; right: 4px; }
+    .top-avatar { width: 31px; height: 31px; }
+    .content { width: min(1190px, 100%); margin: 0 auto; padding: 35px 42px 55px; }
+    .welcome { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; margin-bottom: 26px; }
+    .eyebrow { color: var(--purple); font-size: 11px; font-weight: 700; letter-spacing: .5px; margin-bottom: 8px; }
+    h1 { margin: 0; font-size: 25px; letter-spacing: -.8px; line-height: 1.35; }
+    .welcome p { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+    .button {
+      border: 1px solid var(--line); border-radius: 9px; padding: 10px 14px; background: #fff;
+      color: #555970; font-weight: 600; font-size: 11px; display: inline-flex; align-items: center; gap: 7px; transition: .18s;
+    }
+    .button:hover { border-color: #c9c0f1; transform: translateY(-1px); }
+    .button.primary { color: white; background: var(--purple); border-color: var(--purple); box-shadow: 0 5px 12px #7658e82e; }
+    .button.primary:hover { background: var(--purple-dark); }
+    .button.subtle { background: var(--purple-pale); border-color: var(--purple-pale); color: var(--purple); }
+    .button.small { padding: 8px 11px; font-size: 10px; }
+    .grid { display: grid; grid-template-columns: minmax(0, 1fr) 294px; gap: 18px; align-items: start; }
+    .column { display: grid; gap: 18px; min-width: 0; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 13px; box-shadow: var(--shadow); }
+    .card-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 20px 13px; }
+    .card-title { font-size: 13px; font-weight: 700; }
+    .card-description { color: var(--muted); font-size: 10px; margin-top: 4px; }
+    .text-link { border: 0; padding: 3px; background: none; color: var(--purple); font-size: 10px; font-weight: 600; }
+    .profile-card { padding: 19px 20px 16px; }
+    .profile-top { display: flex; align-items: center; gap: 13px; }
+    .profile-pic { width: 47px; height: 47px; border-radius: 15px; display: grid; place-items: center; background: linear-gradient(145deg, #eee9ff, #dcd3ff); color: #7455df; font-size: 16px; font-weight: 700; }
+    .profile-name { font-size: 14px; font-weight: 700; }
+    .profile-detail { color: var(--muted); font-size: 10px; margin-top: 4px; }
+    .completion { margin-left: auto; text-align: right; }
+    .completion strong { color: var(--purple); font: 700 15px Manrope, sans-serif; }
+    .completion div { color: var(--muted); font-size: 9px; margin-top: 3px; }
+    .profile-progress { height: 4px; margin-top: 17px; border-radius: 9px; background: #f0eef5; overflow: hidden; }
+    .profile-progress span { display: block; width: 78%; height: 100%; border-radius: inherit; background: #8d71ee; }
+    .profile-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; color: #a1a2b1; font-size: 9px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px; }
+    .stat-card { min-height: 96px; padding: 15px 16px; }
+    .stat-top { display: flex; justify-content: space-between; align-items: center; color: #888b9f; font-size: 10px; }
+    .stat-icon { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 8px; color: var(--purple); background: var(--purple-pale); font-size: 13px; }
+    .stat-value { margin-top: 9px; font: 700 20px Manrope, sans-serif; letter-spacing: -.6px; }
+    .stat-value small { color: #8f91a4; font: 500 10px "DM Sans", sans-serif; }
+    .stat-change { color: var(--green); font-size: 9px; margin-top: 3px; }
+    .project-list { padding: 0 12px 11px; }
+    .project {
+      display: flex; align-items: center; gap: 12px; padding: 13px 9px;
+      border: 0; border-top: 1px solid #f1f1f5; background: transparent; color: inherit;
+      text-align: left; font: inherit; transition: .18s; cursor: pointer;
+    }
+    .project:hover { background: #fbfaff; border-radius: 8px; }
+    .company-logo { width: 36px; height: 36px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 11px; font-size: 11px; font-weight: 800; }
+    .logo-sky { color: #1384cc; background: #e9f6ff; }
+    .logo-samsung { color: #fff; background: #1a5bd7; }
+    .logo-kakao { color: #3a3420; background: #f9e45c; }
+    .project-name { font-size: 11px; font-weight: 700; }
+    .project-meta { color: var(--muted); font-size: 9px; margin-top: 5px; }
+    .project-progress { width: 86px; margin-left: auto; }
+    .project-progress-top { display: flex; justify-content: space-between; color: #898b9d; font-size: 9px; margin-bottom: 5px; }
+    .mini-track { height: 4px; background: #f0eff5; border-radius: 8px; overflow: hidden; }
+    .mini-track span { display: block; height: 100%; border-radius: inherit; background: #8a70e9; }
+    .deadline-pill { margin-left: 9px; white-space: nowrap; border-radius: 6px; padding: 5px 7px; color: #bf7a2c; background: var(--orange-pale); font-size: 9px; font-weight: 600; }
+    .deadline-pill.neutral { background: #f4f4f8; color: #86899b; }
+    .doc-list { padding: 0 20px 14px; }
+    .doc-row { display: flex; align-items: center; gap: 9px; padding: 9px 0; border-top: 1px solid #f3f3f7; }
+    .file-icon { width: 28px; height: 30px; border-radius: 7px; display: grid; place-items: center; color: #db5e63; background: #fff0ef; font-size: 8px; font-weight: 800; }
+    .file-icon.doc { color: #4677d6; background: #edf3ff; }
+    .file-name { font-size: 10px; font-weight: 600; }
+    .file-sub { margin-top: 3px; color: #a0a1af; font-size: 9px; }
+    .file-more { margin-left: auto; border: 0; background: none; color: #9698a9; font-size: 15px; }
+    .side-card { padding: 17px; }
+    .side-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 13px; }
+    .side-heading strong { font-size: 12px; }
+    .date-label { color: #a0a2b2; font-size: 9px; }
+    .calendar { border-top: 1px solid #f0f0f5; padding-top: 11px; }
+    .calendar-month { display: flex; justify-content: space-between; align-items: center; font-size: 10px; font-weight: 700; padding: 0 3px 10px; }
+    .calendar-arrows { color: #a2a3b2; letter-spacing: 6px; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; gap: 3px 0; }
+    .calendar-grid span { height: 25px; display: grid; place-items: center; color: #777a8e; font-size: 9px; border-radius: 50%; }
+    .calendar-grid .weekday { height: 21px; color: #b0b1bd; font-size: 8px; }
+    .calendar-grid .today { background: var(--purple); color: #fff; font-weight: 700; }
+    .calendar-grid .has-event { position: relative; color: #49359f; font-weight: 700; }
+    .calendar-grid .has-event:after { content: ""; position: absolute; bottom: 1px; width: 3px; height: 3px; border-radius: 50%; background: #8e73eb; }
+    .deadlines { display: grid; gap: 12px; }
+    .deadline-item { display: flex; gap: 10px; align-items: center; }
+    .deadline-date { width: 36px; height: 37px; border-radius: 9px; background: #fff2eb; display: grid; place-content: center; text-align: center; color: #cd7d4a; font-size: 8px; }
+    .deadline-date b { display: block; font-size: 14px; line-height: 1.1; }
+    .deadline-name { font-size: 10px; font-weight: 700; }
+    .deadline-company { margin-top: 4px; color: #999bad; font-size: 9px; }
+    .tip-card { position: relative; overflow: hidden; padding: 17px; background: linear-gradient(145deg, #f3efff, #f9f7ff); border-color: #ece6ff; }
+    .tip-card:after { content: "✦"; position: absolute; right: 17px; top: 11px; color: #d2c7ff; font-size: 31px; }
+    .tip-kicker { color: var(--purple); font-size: 9px; font-weight: 700; }
+    .tip-card strong { display: block; max-width: 195px; font-size: 12px; line-height: 1.55; margin: 9px 0 6px; }
+    .tip-card p { color: #8e8ba0; font-size: 9px; line-height: 1.7; margin: 0 0 10px; }
+    .tip-card .text-link { padding: 0; }
+
+    /* Workspace and secondary mock screens */
+    .workspace { width: 100%; min-height: calc(100vh - 73px); padding: 22px 24px; }
+    .workspace-header { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 17px; }
+    .back-link { border: 0; background: none; padding: 0; color: #898ca0; font-size: 10px; margin-bottom: 8px; }
+    .workspace-title { font-size: 16px; font-weight: 700; }
+    .workspace-subtitle { margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .workspace-actions { display: flex; gap: 8px; align-items: center; }
+    .panes { min-height: 670px; display: grid; grid-template-columns: 220px minmax(350px, 1fr) 310px; gap: 10px; }
+    .pane { background: #fff; border: 1px solid var(--line); border-radius: 11px; min-width: 0; overflow: hidden; }
+    .pane-head { height: 42px; border-bottom: 1px solid var(--line); padding: 0 13px; display: flex; align-items: center; justify-content: space-between; color: #7d8094; font-size: 10px; font-weight: 700; }
+    .explorer-content { padding: 13px 10px; }
+    .folder-label { padding: 4px 5px 9px; color: #8b8da0; font-size: 9px; font-weight: 600; }
+    .tree-item { display: flex; align-items: center; gap: 8px; padding: 8px 7px; border-radius: 6px; color: #777a8e; font-size: 9px; }
+    .tree-item.selected { background: #f3efff; color: #6d51d1; font-weight: 600; }
+    .tree-indent { padding-left: 17px; }
+    .upload-button { width: 100%; border: 1px dashed #ded9ee; border-radius: 7px; padding: 8px; background: white; color: #89849f; margin-top: 10px; font-size: 9px; }
+    .editor-toolbar { height: 41px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 14px; padding: 0 15px; color: #989aac; font-size: 10px; }
+    .editor-toolbar strong { color: #717489; font-weight: 500; }
+    .editor-body { max-width: 650px; margin: 0 auto; padding: 31px 40px; }
+    .editor-caption { color: #a3a4b2; font-size: 9px; margin-bottom: 19px; }
+    .editor-body h2 { font-size: 18px; margin: 0 0 10px; }
+    .editor-body .prompt { color: #7f8296; font-size: 11px; line-height: 1.7; margin-bottom: 17px; }
+    .character-count { display: flex; justify-content: flex-end; color: #a1a3b0; font-size: 9px; margin: 8px 0 15px; }
+    .editor-body textarea { display: block; resize: vertical; width: 100%; min-height: 340px; border: 1px solid #eeeef4; border-radius: 8px; outline: none; padding: 15px; color: #55596f; font-size: 11px; line-height: 2; }
+    .editor-body textarea:focus { border-color: #c5b8f5; }
+    .result-strip { margin-top: 15px; border: 1px solid #f0edf8; border-radius: 8px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; color: #797c91; font-size: 9px; }
+    .result-actions { display: flex; gap: 5px; }
+    .result-chip { border: 1px solid #e8e8ef; border-radius: 5px; background: #fff; padding: 5px 7px; color: #818397; font-size: 8px; }
+    .result-chip.selected { color: #23896c; background: #eaf8f1; border-color: #d7eee4; }
+    .agent-title { display: flex; gap: 8px; align-items: center; }
+    .sparkle { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 7px; color: #7658e8; background: #f0ecff; }
+    .credit-cost { color: #8a7bc1; font-size: 9px; font-weight: 500; }
+    .chat-content { height: 566px; padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 13px; }
+    .chat-date { text-align: center; color: #b1b2be; font-size: 8px; }
+    .chat-message { max-width: 95%; border-radius: 9px; background: #f6f5f9; padding: 10px; color: #66697e; font-size: 9px; line-height: 1.8; }
+    .chat-message.user { align-self: flex-end; color: #fff; background: #8063e6; }
+    .chat-message b { color: #50417f; }
+    .chat-message.user b { color: white; }
+    .chat-suggestion { border: 1px solid #ebe8f5; color: #7f7a94; background: white; border-radius: 14px; padding: 6px 9px; font-size: 8px; text-align: left; }
+    .agent-pane { position: relative; }
+    .chat-input { margin: auto 11px 11px; border: 1px solid #e9e8ef; border-radius: 9px; padding: 9px; }
+    .mention-menu { position: absolute; z-index: 6; left: 12px; right: 12px; bottom: 66px; display: grid; max-height: 180px; overflow-y: auto; padding: 5px; border: 1px solid var(--line); border-radius: 9px; background: #fff; box-shadow: 0 8px 25px #20233a18; }
+    .mention-menu[hidden] { display: none; }
+    .mention-option { padding: 9px; border: 0; border-radius: 6px; background: #fff; color: #555970; text-align: left; font-size: 10px; }
+    .mention-option:hover { background: #f4f1ff; color: var(--purple); }
+    .chat-mention { display: inline-block; padding: 1px 5px; border-radius: 4px; background: #eee9ff; color: #6347c8; font-weight: 600; }
+    .chat-input textarea { width: 100%; resize: none; height: 37px; border: 0; outline: 0; color: #66697e; font-size: 9px; }
+    .chat-input-bottom { display: flex; justify-content: space-between; align-items: center; color: #adaebb; font-size: 8px; }
+    .send-button { border: 0; border-radius: 6px; background: var(--purple); color: #fff; width: 25px; height: 24px; }
+    .secondary-title { display: flex; justify-content: space-between; align-items: end; margin-bottom: 22px; }
+    .dashboard-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 17px; }
+    .dashboard-stat { padding: 17px; }
+    .dashboard-stat .stat-value { font-size: 23px; }
+    .analysis-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; }
+    .analysis-card { padding: 19px; }
+    .score-wrap { display: flex; align-items: center; gap: 19px; margin: 21px 0; }
+    .score-ring { width: 112px; height: 112px; flex: 0 0 auto; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(#8063e6 0 76%, #eeeaf7 76% 100%); position: relative; }
+    .score-ring:before { content: ""; width: 88px; height: 88px; border-radius: 50%; position: absolute; background: white; }
+    .score-center { z-index: 1; text-align: center; }
+    .score-center b { display: block; font: 800 28px Manrope; }
+    .score-center small { color: #999bad; font-size: 9px; }
+    .score-notes { display: grid; gap: 10px; }
+    .score-note { color: #7c7f93; font-size: 10px; }
+    .score-note b { color: #4c5066; }
+    .score-note span { display: block; color: #aaaaba; font-size: 9px; margin-top: 4px; }
+    .insight { padding: 11px 0; border-top: 1px solid #f0eff4; }
+    .insight b { font-size: 10px; }
+    .insight p { color: #85889c; font-size: 9px; line-height: 1.7; margin: 6px 0 0; }
+    .match-card { padding: 18px; margin-top: 16px; }
+    .match-row { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-top: 1px solid #f0eff4; }
+    .match-score { margin-left: auto; font: 700 11px Manrope; color: var(--purple); }
+    .status-tag { font-size: 8px; padding: 4px 6px; border-radius: 5px; background: #eaf8f1; color: #348969; }
+    .status-tag.fail { color: #d16d78; background: #fff0f1; }
+    .form-card { max-width: 760px; padding: 23px; }
+    .form-field { margin-top: 18px; }
+    .form-field label { display: block; margin-bottom: 7px; color: #62657a; font-size: 10px; font-weight: 700; }
+    .form-field input, .form-field select, .form-field textarea { width: 100%; border: 1px solid #e8e8ef; border-radius: 8px; padding: 11px; background: white; outline: none; color: #55586d; font-size: 10px; }
+    .form-field textarea { min-height: 170px; resize: vertical; line-height: 1.8; }
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color: #c8bdf3; }
+    .form-hint { color: #a0a1b0; font-size: 9px; margin-top: 6px; }
+    .outcome-options { display: flex; gap: 7px; }
+    .outcome-option { border: 1px solid #e9e8ef; border-radius: 7px; padding: 9px 15px; color: #818398; background: white; font-size: 10px; }
+    .outcome-option.selected { background: #eaf8f1; color: #23896c; border-color: #cdebdc; }
+    .reward-banner { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding: 14px; border-radius: 9px; color: #6f5aab; background: #f4f0ff; font-size: 10px; }
+    .reward-banner strong { font-size: 12px; }
+    .empty-note { color: var(--muted); font-size: 11px; line-height: 1.7; padding: 12px 0; }
+    .toast { position: fixed; bottom: 22px; left: 50%; transform: translate(-50%, 15px); opacity: 0; pointer-events: none; background: #29263a; color: white; border-radius: 9px; padding: 11px 16px; font-size: 11px; box-shadow: 0 8px 30px #29263a35; transition: .25s; z-index: 20; }
+    .toast.show { transform: translate(-50%, 0); opacity: 1; }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 10; background: #22213773; display: none; place-items: center; padding: 18px; backdrop-filter: blur(3px); }
+    .modal-backdrop.open { display: grid; }
+    .modal { width: min(470px, 100%); background: white; border-radius: 15px; padding: 24px; box-shadow: 0 20px 70px #17152b40; animation: appear .2s ease-out; }
+    @keyframes appear { from { opacity: 0; transform: translateY(8px) scale(.99); } to { opacity: 1; transform: none; } }
+    .modal-header { display: flex; justify-content: space-between; align-items: start; }
+    .modal-header h2 { margin: 0; font-size: 17px; }
+    .modal-header p { color: var(--muted); font-size: 10px; margin: 6px 0 0; }
+    .close-modal { border: 0; color: #9294a4; background: transparent; font-size: 19px; }
+    .modal .form-field { margin-top: 14px; }
+    .modal-footer { margin-top: 22px; display: flex; justify-content: flex-end; gap: 8px; }
+    .docs-choice { border: 1px solid #efeff4; border-radius: 8px; padding: 9px; display: flex; align-items: center; gap: 8px; color: #76798d; font-size: 9px; margin-top: 7px; }
+    .docs-choice input { accent-color: var(--purple); }
+    .mobile-menu { display: none; }
+    .login-screen { position: fixed; inset: 0; z-index: 20; display: grid; grid-template-columns: minmax(300px, 1.02fr) minmax(360px, .98fr); background: #fff; }
+    .login-story { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: clamp(30px, 5vw, 72px); color: #fff; background: radial-gradient(ellipse at 78% 18%, #a98cff 0, transparent 35%), linear-gradient(145deg, #7255df, #4530a5); }
+    .login-story:after { display: none; }
+    .login-brand { display: flex; align-items: center; gap: 10px; font: 800 20px Manrope, sans-serif; letter-spacing: -.7px; }
+    .login-brand-mark { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid #ffffff70; border-radius: 12px; background: #ffffff20; }
+    .login-pitch { position: relative; z-index: 1; max-width: 470px; padding: 55px 0; }
+    .login-pitch h1 { font-size: clamp(25px, 3vw, 36px); line-height: 1.35; letter-spacing: -1px; }
+    .login-pitch p { max-width: 390px; color: #e2dcff; font-size: 13px; line-height: 1.8; }
+    .login-features { display: grid; gap: 12px; margin-top: 24px; color: #f4f1ff; font-size: 12px; }
+    .login-panel { display: grid; place-items: center; padding: 32px; }
+    .login-card { width: min(390px, 100%); }
+    .login-card h2 { margin: 0; font-size: 26px; letter-spacing: -.8px; }
+    .login-card > p { margin: 9px 0 30px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+    .google-button { width: 100%; min-height: 49px; display: flex; align-items: center; justify-content: center; gap: 11px; border: 1px solid #dedfe6; border-radius: 9px; background: #fff; color: #333542; font-size: 12px; font-weight: 700; transition: .18s; }
+    .google-button:hover { border-color: #b8a9f0; box-shadow: 0 5px 16px #41316c12; transform: translateY(-1px); }
+    .google-mark { width: 18px; height: 18px; }
+    .login-terms { margin-top: 20px; color: #a0a2b0; font-size: 10px; line-height: 1.8; text-align: center; }
+    .login-terms a { color: #7160b2; text-decoration: none; }
+    .login-note { display: flex; gap: 9px; margin-top: 34px; padding: 13px; border-radius: 9px; background: #f8f7fc; color: #85869a; font-size: 10px; line-height: 1.7; }
+    .login-note b { color: #6550c2; }
+    .login-screen.hidden { display: none; }
+    @media (max-width: 1100px) {
+      .sidebar { width: 215px; flex-basis: 215px; }
+      .topbar { padding: 0 27px; }
+      .content { padding: 29px 27px 45px; }
+      .grid { grid-template-columns: minmax(0,1fr) 270px; gap: 13px; }
+      .panes { grid-template-columns: 180px minmax(300px,1fr) 275px; gap: 7px; }
+      .workspace { padding: 18px 15px; }
+    }
+    @media (max-width: 850px) {
+      .sidebar { width: 68px; flex-basis: 68px; padding: 22px 9px 15px; }
+      .brand { padding: 0 7px 30px; }
+      .brand-name, .workspace-label, .nav-item span:not(.nav-icon), .credit-box, .user-box > div:not(.avatar), .user-more { display: none; }
+      .nav-item { justify-content: center; padding: 11px 0; }
+      .nav-icon { font-size: 18px; }
+      .user-box { justify-content: center; margin: 17px 0 0; padding: 13px 0 0; }
+      .grid { grid-template-columns: minmax(0,1fr); }
+      .right-column { grid-template-columns: repeat(2, minmax(0,1fr)); align-items: start; }
+      .right-column .tip-card { grid-column: span 2; }
+      .panes { grid-template-columns: 165px minmax(320px,1fr); }
+      .agent-pane { grid-column: 1 / -1; min-height: 350px; }
+      .chat-content { height: 235px; }
+    }
+    @media (max-width: 600px) {
+      .login-screen { display: flex; flex-direction: column; overflow-y: auto; }
+      .login-story { min-height: 250px; padding: 25px 24px; }
+      .login-story:after { width: 250px; height: 250px; right: -130px; bottom: -110px; }
+      .login-pitch { padding: 27px 0 12px; }
+      .login-pitch h1 { font-size: 25px; }
+      .login-pitch p { margin-bottom: 0; font-size: 11px; }
+      .login-quote { display: none; }
+      .login-panel { flex: 1; padding: 30px 24px; }
+      .login-card h2 { font-size: 22px; }
+      .sidebar { width: 55px; flex-basis: 55px; padding: 17px 6px 12px; }
+      .brand { padding: 0 4px 25px; }
+      .brand-mark { width: 31px; height: 31px; }
+      .topbar { height: 60px; padding: 0 16px; }
+      .top-actions { gap: 9px; }
+      .content { padding: 25px 15px 38px; }
+      .welcome { align-items: flex-start; }
+      .welcome h1 { font-size: 21px; }
+      .welcome .button { padding: 9px; font-size: 0; }
+      .welcome .button span { font-size: 14px; }
+      .stats { gap: 7px; }
+      .stat-card { padding: 11px 9px; min-height: 89px; }
+      .stat-top { font-size: 8px; }
+      .stat-value { font-size: 17px; }
+      .stat-value small { font-size: 8px; }
+      .project-progress { width: 55px; }
+      .deadline-pill { margin-left: 0; font-size: 8px; padding: 4px; }
+      .right-column { grid-template-columns: 1fr; }
+      .right-column .tip-card { grid-column: auto; }
+      .dashboard-stats { grid-template-columns: repeat(2,1fr); }
+      .analysis-grid { grid-template-columns: 1fr; }
+      .panes { display: flex; flex-direction: column; }
+      .explorer-pane { min-height: 175px; }
+      .editor-body { padding: 24px 17px; }
+      .editor-body textarea { min-height: 270px; }
+      .workspace { padding: 15px 10px; }
+      .workspace-actions .button { padding: 8px; font-size: 9px; }
+      .workspace-header { align-items: flex-start; }
+      .workspace-title { font-size: 14px; }
+      .result-strip { align-items: flex-start; gap: 8px; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <section class="login-screen" id="login-screen" aria-label="Careerly 로그인">
+    <div class="login-story">
+      <div class="login-brand"><span class="login-brand-mark">C</span>career<span style="color:#d7cbff">ly</span></div>
+      <div class="login-pitch"><h1>취업 준비 자료와<br>자기소개서 관리</h1><div class="login-features"><span>프로젝트와 마감일 관리</span><span>경험·증빙 자료 보관</span><span>자기소개서 작성 및 AI 피드백</span></div></div>
+      <div class="login-quote"></div>
+    </div>
+    <div class="login-panel"><div class="login-card">
+      <h2>로그인</h2><p>계정에 로그인해 프로젝트와 자료를 확인하세요.</p>
+      <button class="google-button" id="google-login" type="button"><svg class="google-mark" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.93c-.58 2.96-2.26 5.48-4.74 7.18l7.73 6C44.42 37.9 46.98 31.7 46.98 24.55z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.2A23.9 23.9 0 0 0 0 24c0 3.87.93 7.52 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.14 1.44-4.88 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Google 계정으로 로그인</button>
+      <div class="login-terms">계속하면 Careerly의 <a href="#terms">이용약관</a> 및 <a href="#privacy">개인정보 처리방침</a>에 동의한 것으로 간주돼요.</div>
+      <div class="login-note"><span>ⓘ</span><span>Google 계정 인증을 사용합니다. 프로필과 지원 자료는 계정별로 저장됩니다.</span></div>
+    </div></div>
+  </section>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">C</div><div class="brand-name">career<span>ly</span></div></div>
+      <div class="workspace-label">WORKSPACE</div>
+      <nav class="nav" aria-label="메인 메뉴">
+        <button class="nav-item active" data-page="home"><span class="nav-icon">⌂</span><span>프로젝트 허브</span></button>
+        <button class="nav-item" data-page="workspace"><span class="nav-icon">▤</span><span>내 워크스페이스</span></button>
+        <button class="nav-item" data-page="dashboard"><span class="nav-icon">◷</span><span>AI 분석 리포트</span><span class="nav-badge">NEW</span></button>
+        <button class="nav-item" data-page="collect"><span class="nav-icon">＋</span><span>합격 데이터 기여</span></button>
+        <button class="nav-item" data-page="profile"><span class="nav-icon">◎</span><span>내 프로필 &amp; 자료</span></button>
+      </nav>
+      <div class="side-bottom">
+        <div class="credit-box">
+          <div class="credit-top"><span>이번 달 크레딧</span><span>✦</span></div>
+          <div class="credit-count" style="margin-top:8px">680 <span>/ 1,000</span></div>
+          <div class="credit-track"><span></span></div>
+          <div class="credit-note">다음 충전일 · 11월 1일</div>
+        </div>
+        <div class="user-box"><div class="avatar">민</div><div><div class="user-name">김민서</div><div class="user-sub">대학생 · 취업 준비 중</div></div><span class="user-more">···</span></div>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div class="breadcrumb"><strong id="crumb">프로젝트 허브</strong><span id="crumb-detail"></span></div>
+        <div class="top-actions"><button class="icon-button" aria-label="도움말">?⃝</button><button class="icon-button" aria-label="알림">♧<i class="notification-dot"></i></button><div class="avatar top-avatar">민</div></div>
+      </header>
+      <div id="page-content"></div>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <div class="modal-backdrop" id="project-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <form class="modal" id="project-form">
+      <div class="modal-header"><div><h2 id="modal-title">새 프로젝트 만들기</h2><p>기업, 직무, 마감일과 프로젝트 자료를 설정합니다.</p></div><button class="close-modal" type="button" aria-label="닫기">×</button></div>
+      <div class="form-field"><label for="company">기업명 <span style="color:#d65b69">*</span></label><input id="company" required placeholder="예: 네이버"></div>
+      <div class="form-field"><label for="position">지원 직무 <span style="color:#d65b69">*</span></label><input id="position" required placeholder="예: 서비스 기획"></div>
+      <div class="form-field"><label for="deadline">지원 마감일</label><input id="deadline" type="date"></div>
+      <div class="form-field"><label>프로젝트에 포함할 자료 <span style="color:#a1a2b1;font-weight:400">사용하지 않을 자료는 선택 해제하세요</span></label>
+        <label class="docs-choice"><input type="checkbox" checked> 📄 이력서_김민서.pdf</label>
+        <label class="docs-choice"><input type="checkbox" checked> 📄 서비스기획_포트폴리오.pdf</label>
+      </div>
+      <div class="modal-footer"><button class="button cancel-modal" type="button">취소</button><button class="button primary" type="submit">워크스페이스 만들기 <span>→</span></button></div>
+    </form>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./supabase-config.js"></script>
+  <script>
+    const pageContent = document.getElementById("page-content");
+    const crumb = document.getElementById("crumb");
+    const crumbDetail = document.getElementById("crumb-detail");
+    const toast = document.getElementById("toast");
+    let activePage = "home";
+    const savedPrototype = (() => {
+      try { return JSON.parse(localStorage.getItem("careerly-prototype") || "{}"); }
+      catch { return {}; }
+    })();
+    let userProjects = Array.isArray(savedPrototype.projects) ? savedPrototype.projects : [];
+    let activeProject = savedPrototype.activeProject || null;
+    let credits = Number.isFinite(savedPrototype.credits) ? savedPrototype.credits : 680;
+    const sampleEssay = `사용자가 더 나은 선택을 할 수 있도록 돕는 서비스를 만드는 것이 제 목표입니다. 교내 창업 동아리에서 학생들의 불편을 관찰하고 이를 해결하는 서비스를 기획하며, 작은 개선이 일상의 경험을 바꿀 수 있다는 것을 배웠습니다.
+
+당시 교내 행사 정보를 찾기 어렵다는 문제를 발견해 팀원들과 정보 탐색 과정을 인터뷰했습니다. 사용자의 의견을 바탕으로 핵심 정보를 한눈에 볼 수 있는 화면을 설계했고, 프로토타입 테스트를 통해 정보 탐색 시간을 줄였습니다. 이 경험을 통해 좋은 기획은 사용자의 목소리에서 출발한다는 점을 체감했습니다.
+
+네이버에서도 기술과 사람을 연결하는 서비스 경험을 고민하고 싶습니다. 데이터를 바탕으로 문제를 발견하고, 다양한 직군과 협업해 사용자의 일상에 자연스럽게 스며드는 서비스를 만드는 기획자로 성장하겠습니다.`;
+    function persistPrototype() {
+      localStorage.setItem("careerly-prototype", JSON.stringify({ projects: userProjects, activeProject, credits }));
+    }
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+    }
+
+    const supabaseConfig = window.CAREERLY_SUPABASE || {};
+    const supabaseReady = Boolean(window.supabase && supabaseConfig.url && supabaseConfig.anonKey && !supabaseConfig.url.includes("YOUR_PROJECT"));
+    const supabaseClient = supabaseReady ? window.supabase.createClient(supabaseConfig.url, supabaseConfig.anonKey) : null;
+
+    async function enterWorkspace(session) {
+      document.getElementById("login-screen").classList.add("hidden");
+      if (session?.user) {
+        const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email || "사용자";
+        document.querySelectorAll(".user-name").forEach(element => element.textContent = name);
+        const initial = [...name][0] || "나";
+        document.querySelectorAll(".avatar").forEach(element => element.textContent = initial);
+        showToast(`${name} 계정으로 로그인했습니다.`);
+      }
+    }
+
+    document.getElementById("google-login").addEventListener("click", async () => {
+      if (!supabaseClient) {
+        await enterWorkspace(null);
+        showToast("미리보기 모드예요. Google OAuth를 사용하려면 Supabase 설정을 추가해 주세요.");
+        return;
+      }
+      const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: window.location.origin }
+      });
+      if (error) showToast(`Google 로그인에 실패했어요: ${error.message}`);
+    });
+
+    if (supabaseClient) {
+      supabaseClient.auth.getSession().then(({ data: { session } }) => { if (session) enterWorkspace(session); });
+      supabaseClient.auth.onAuthStateChange((_event, session) => {
+        if (session) enterWorkspace(session);
+        else document.getElementById("login-screen").classList.remove("hidden");
+      });
+    }
+
+    const projectRows = [
+      { logo: "N", logoClass: "logo-sky", name: "2025 상반기 서비스 기획", company: "네이버 · 서비스 기획", progress: 72, due: "D-3", dueClass: "" },
+      { logo: "S", logoClass: "logo-samsung", name: "대졸 신입 공채", company: "삼성전자 · UX 기획", progress: 45, due: "D-12", dueClass: "" },
+      { logo: "K", logoClass: "logo-kakao", name: "겨울 인턴십", company: "카카오 · 프로덕트 매니저", progress: 28, due: "D-24", dueClass: "neutral" }
+    ];
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.timeout);
+      showToast.timeout = window.setTimeout(() => toast.classList.remove("show"), 2600);
+    }
+
+    function renderHome() {
+      crumb.textContent = "프로젝트 허브";
+      crumbDetail.textContent = "";
+      pageContent.innerHTML = `
+        <div class="content">
+          <section class="welcome">
+            <div><h1>프로젝트 허브</h1><p>지원 프로젝트, 자료, 마감일</p></div>
+            <button class="button primary" id="new-project"><span>＋</span> 새 프로젝트</button>
+          </section>
+          <div class="grid">
+            <div class="column">
+              <section class="card profile-card">
+                <div class="profile-top"><div class="profile-pic">민</div><div><div class="profile-name">김민서 <span style="font-size:9px;color:#a1a2b1;font-weight:500">프로필</span></div><div class="profile-detail">서울대학교 · 경영학과 4학년 · 졸업 예정 2026.02</div></div><div class="completion"><strong>78%</strong><div>프로필 완성도</div></div></div>
+                <div class="profile-progress"><span></span></div><div class="profile-footer"><span>프로필 입력 현황</span><button class="text-link" data-go="profile">프로필 편집 →</button></div>
+              </section>
+              <section class="stats">
+                <div class="card stat-card"><div class="stat-top"><span>진행 중인 지원</span><span class="stat-icon">▤</span></div><div class="stat-value">${3 + userProjects.length}<small> 건</small></div></div>
+                <div class="card stat-card"><div class="stat-top"><span>AI 분석 점수</span><span class="stat-icon">◷</span></div><div class="stat-value">76<small> / 100</small></div></div>
+                <div class="card stat-card"><div class="stat-top"><span>보유 크레딧</span><span class="stat-icon">✦</span></div><div class="stat-value">680<small> C</small></div></div>
+              </section>
+              <section class="card">
+                <div class="card-head"><div><div class="card-title">지원 프로젝트 <span style="color:#aaaaba;font-size:10px;font-weight:500">(${3 + userProjects.length})</span></div><div class="card-description">프로젝트별 작성 진척도와 마감일</div></div><button class="text-link" id="all-projects">전체 보기 →</button></div>
+                <div class="project-list">${userProjects.map(p => `<button class="project open-workspace" data-project-id="${escapeHtml(p.id)}" style="width:100%;text-align:left"><div class="company-logo" style="color:#7356db;background:#f0ecff">${escapeHtml([...p.company][0] || "새")}</div><div><div class="project-name">${escapeHtml(p.company)} · ${escapeHtml(p.position)}</div><div class="project-meta">내 프로젝트 · 자기소개서</div></div><div class="project-progress"><div class="project-progress-top"><span>작성 진척도</span><span>${p.progress || 0}%</span></div><div class="mini-track"><span style="width:${p.progress || 0}%"></span></div></div><span class="deadline-pill neutral">${p.deadline ? escapeHtml(p.deadline) : "마감일 없음"}</span></button>`).join("")}
+                  ${projectRows.map((p, index) => `<button class="project open-workspace" data-seed-project="${index}" style="width:100%;text-align:left"><div class="company-logo ${p.logoClass}">${p.logo}</div><div><div class="project-name">${p.name}</div><div class="project-meta">${p.company}</div></div><div class="project-progress"><div class="project-progress-top"><span>작성 진척도</span><span>${p.progress}%</span></div><div class="mini-track"><span style="width:${p.progress}%"></span></div></div><span class="deadline-pill ${p.dueClass}">${p.due}</span></button>`).join("")}
+                </div>
+              </section>
+              <section class="card">
+                <div class="card-head"><div><div class="card-title">자료 보관함</div><div class="card-description">프로필에 저장된 이력서와 증빙 자료</div></div><button class="text-link" data-go="profile">자료 관리 →</button></div>
+                <div class="doc-list">
+                  <div class="doc-row"><div class="file-icon">PDF</div><div><div class="file-name">이력서_김민서.pdf</div><div class="file-sub">업데이트 10월 24일 · 1.2 MB</div></div><button class="file-more" aria-label="더 보기">···</button></div>
+                  <div class="doc-row"><div class="file-icon">PDF</div><div><div class="file-name">서비스기획_포트폴리오.pdf</div><div class="file-sub">업데이트 10월 21일 · 4.8 MB</div></div><button class="file-more" aria-label="더 보기">···</button></div>
+                  <div class="doc-row"><div class="file-icon doc">DOC</div><div><div class="file-name">대외활동_경험정리.docx</div><div class="file-sub">업데이트 10월 18일 · 248 KB</div></div><button class="file-more" aria-label="더 보기">···</button></div>
+                </div>
+              </section>
+            </div>
+            <aside class="column right-column">
+              <section class="card side-card">
+                <div class="side-heading"><strong>이번 달 일정</strong><span class="date-label">모두 보기 →</span></div>
+                <div class="calendar"><div class="calendar-month"><span>2025년 10월</span><span class="calendar-arrows">‹ ›</span></div>
+                  <div class="calendar-grid"><span class="weekday">일</span><span class="weekday">월</span><span class="weekday">화</span><span class="weekday">수</span><span class="weekday">목</span><span class="weekday">금</span><span class="weekday">토</span>
+                  ${["","","","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31",""].map((d,i)=>`<span class="${d==="29"?"today":(["30","3","12"].includes(d)?"has-event":"")}">${d}</span>`).join("")}</div></div>
+              </section>
+              <section class="card side-card"><div class="side-heading"><strong>다가오는 마감</strong><button class="text-link">캘린더 →</button></div><div class="deadlines">
+                <div class="deadline-item"><div class="deadline-date"><span>OCT</span><b>30</b></div><div><div class="deadline-name">서비스 기획 지원서</div><div class="deadline-company">네이버 · 마감까지 3일</div></div></div>
+                <div class="deadline-item"><div class="deadline-date"><span>NOV</span><b>08</b></div><div><div class="deadline-name">대졸 신입 공채</div><div class="deadline-company">삼성전자 · 마감까지 12일</div></div></div>
+                <div class="deadline-item"><div class="deadline-date"><span>NOV</span><b>20</b></div><div><div class="deadline-name">겨울 인턴십</div><div class="deadline-company">카카오 · 마감까지 24일</div></div></div>
+              </div></section>
+            </aside>
+          </div>
+        </div>`;
+      bindPageActions();
+    }
+
+    function renderWorkspace() {
+      crumb.textContent = "내 워크스페이스";
+      crumbDetail.textContent = "　/　 네이버 · 서비스 기획";
+      pageContent.innerHTML = `
+        <div class="workspace">
+          <div class="workspace-header"><div><button class="back-link" data-go="home">← 프로젝트 허브로</button><div class="workspace-title">${escapeHtml(activeProject?.company || "네이버")} · ${escapeHtml(activeProject?.position || "2025 상반기 서비스 기획")}</div><div class="workspace-subtitle">${activeProject?.deadline ? `마감일 ${escapeHtml(activeProject.deadline)}` : "지원 마감일 미설정"}　·　마지막 저장 <span id="save-time">저장 전</span></div></div>
+            <div class="workspace-actions"><button class="button small" data-go="dashboard">◷ AI 분석</button><button class="button primary small" id="save-doc">저장 완료 ✓</button></div></div>
+          <div class="panes">
+            <section class="pane explorer-pane"><div class="pane-head"><span>EXPLORER</span><button class="text-link" id="upload-trigger" aria-label="자료 추가">＋</button></div><div class="explorer-content"><div class="folder-label">⌄　${escapeHtml((activeProject?.company || "네이버") + "_" + (activeProject?.position || "서비스기획"))}</div><div class="tree-item tree-indent selected">▤　자기소개서.md</div><div class="tree-item tree-indent">📄　이력서_김민서.pdf</div><div class="tree-item tree-indent">📄　포트폴리오.pdf</div><div class="tree-item tree-indent">▤　경험_아카이브.md</div><div id="uploaded-files"></div><button class="upload-button" id="upload-file">＋　자료 추가하기</button><input id="file-picker" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.hwpx,.md" hidden></div></section>
+            <section class="pane"><div class="pane-head"><span>✎　자기소개서.md</span><span>···</span></div><div class="editor-toolbar"><strong>B</strong><i>I</i><span>H₁</span><span>≡</span><span>↗</span><span style="margin-left:auto">Markdown</span></div>
+              <div class="editor-body"><div class="editor-caption">문항 01　·　필수 문항</div><h2>${escapeHtml(activeProject?.company || "네이버")}에 지원한 동기와 입사 후 이루고 싶은 목표를 작성해 주세요.</h2><div class="prompt">※ 본인의 경험과 역량을 바탕으로 구체적으로 작성해 주세요. (1,000자 이내)</div>
+                <textarea id="essay" aria-label="자기소개서 작성" placeholder="자기소개서를 작성하세요.">${escapeHtml(activeProject?.essay ?? savedPrototype.seedEssay ?? sampleEssay)}</textarea>
+                <div class="character-count"><span id="char-count">0</span>&nbsp; / 1,000자</div>
+                <div class="result-strip"><span>지원 결과를 기록하면 <b style="color:#7558dc">+500 크레딧</b>을 받을 수 있어요.</span><div class="result-actions"><button class="result-chip" data-result="대기 중">대기 중</button><button class="result-chip" data-result="합격">합격</button><button class="result-chip" data-result="불합격">불합격</button></div></div>
+              </div></section>
+            <section class="pane agent-pane"><div class="pane-head"><span class="agent-title"><i class="sparkle">✦</i> AI 어시스턴트</span><span class="credit-cost">${credits} C</span></div>
+              <div class="chat-content" id="chat-content"><div class="chat-message">현재 작성 중인 문항을 검토할 수 있습니다. 질문에 파일을 포함하려면 <b>@</b>를 입력하세요.</div><button class="chat-suggestion">이 문단을 간결하게 다듬어줘</button><button class="chat-suggestion">STAR 구조로 정리해줘</button></div>
+              <div class="mention-menu" id="mention-menu" role="listbox" aria-label="참조할 파일" hidden></div><div class="chat-input"><textarea id="chat-prompt" placeholder="질문을 입력하세요. @로 파일 참조"></textarea><div class="chat-input-bottom"><span>응답 1회당 10 크레딧</span><button class="send-button" id="send-chat" aria-label="보내기">↑</button></div></div>
+            </section>
+          </div>
+        </div>`;
+      document.querySelectorAll(".result-chip").forEach(button => button.addEventListener("click", () => {
+        document.querySelectorAll(".result-chip").forEach(chip => chip.classList.remove("selected"));
+        button.classList.add("selected");
+        const outcome = button.dataset.result;
+        const project = activeProject && userProjects.find(item => item.id === activeProject.id);
+        if (project && outcome !== "대기 중" && !project.rewarded) {
+          project.rewarded = true;
+          credits += 500;
+          activeProject = project;
+          persistPrototype();
+          showToast(`${outcome} 결과를 기록했어요. +500 크레딧!`);
+        } else {
+          if (project) { project.outcome = outcome; activeProject = project; persistPrototype(); }
+          showToast(outcome === "대기 중" ? "지원 결과를 대기 중으로 기록했어요." : `${outcome} 결과를 기록했어요.`);
+        }
+      }));
+      document.querySelectorAll(".chat-suggestion").forEach(button => button.addEventListener("click", () => { document.getElementById("chat-prompt").value = button.textContent.trim(); }));
+      document.getElementById("send-chat").addEventListener("click", sendChat);
+      const chatPrompt = document.getElementById("chat-prompt");
+      const mentionMenu = document.getElementById("mention-menu");
+      function availableMentions() {
+        return ["자기소개서.md", "이력서_김민서.pdf", "포트폴리오.pdf", "경험_아카이브.md", ...[...document.querySelectorAll("#uploaded-files .tree-item")].map(row => row.textContent.trim().replace(/^📄\s*/, ""))];
+      }
+      function hideMentionMenu() { mentionMenu.hidden = true; mentionMenu.replaceChildren(); }
+      function updateMentionMenu() {
+        const prefix = chatPrompt.value.slice(0, chatPrompt.selectionStart);
+        const match = prefix.match(/@([^\s@]*)$/);
+        if (!match) { hideMentionMenu(); return; }
+        const query = match[1].toLocaleLowerCase();
+        const matches = [...new Set(availableMentions())].filter(name => name.toLocaleLowerCase().includes(query));
+        mentionMenu.replaceChildren();
+        matches.forEach(name => {
+          const option = document.createElement("button");
+          option.type = "button";
+          option.className = "mention-option";
+          option.setAttribute("role", "option");
+          option.textContent = `▤　${name}`;
+          option.addEventListener("click", () => {
+            const cursor = chatPrompt.selectionStart;
+            const before = chatPrompt.value.slice(0, cursor).replace(/@([^\s@]*)$/, `@{${name}} `);
+            chatPrompt.value = before + chatPrompt.value.slice(cursor);
+            chatPrompt.focus();
+            hideMentionMenu();
+          });
+          mentionMenu.appendChild(option);
+        });
+        mentionMenu.hidden = matches.length === 0;
+      }
+      chatPrompt.addEventListener("input", updateMentionMenu);
+      chatPrompt.addEventListener("keydown", event => {
+        if (event.key === "Escape") hideMentionMenu();
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          const firstOption = mentionMenu.querySelector(".mention-option");
+          if (!mentionMenu.hidden && firstOption) firstOption.click();
+          else sendChat();
+        }
+      });
+      bindPageActions();
+      const essay = document.getElementById("essay");
+      const count = () => { document.getElementById("char-count").textContent = essay.value.length.toLocaleString("ko-KR"); };
+      count();
+      essay.addEventListener("input", count);
+      document.getElementById("save-doc").addEventListener("click", () => {
+        if (activeProject) {
+          const item = userProjects.find(project => project.id === activeProject.id);
+          if (item) item.essay = essay.value;
+          activeProject.essay = essay.value;
+          persistPrototype();
+        } else {
+          savedPrototype.seedEssay = essay.value;
+          localStorage.setItem("careerly-prototype", JSON.stringify({ projects: userProjects, activeProject, credits, seedEssay: essay.value }));
+        }
+        document.getElementById("save-time").textContent = "방금";
+        showToast("초안을 이 브라우저에 저장했어요.");
+      });
+      const picker = document.getElementById("file-picker");
+      const openPicker = () => picker.click();
+      document.getElementById("upload-trigger").addEventListener("click", openPicker);
+      document.getElementById("upload-file").addEventListener("click", openPicker);
+      picker.addEventListener("change", () => {
+        const list = document.getElementById("uploaded-files");
+        [...picker.files].forEach(file => {
+          const row = document.createElement("div");
+          row.className = "tree-item tree-indent";
+          row.textContent = `📄　${file.name}`;
+          list.appendChild(row);
+        });
+        if (picker.files.length) showToast(`${picker.files.length}개 자료를 워크스페이스에 추가했어요. (목업)`);
+        picker.value = "";
+      });
+    }
+
+    function sendChat() {
+      const input = document.getElementById("chat-prompt");
+      if (!input || !input.value.trim()) { showToast("AI에게 보낼 내용을 입력해 주세요."); return; }
+      if (credits < 10) { showToast("크레딧이 부족해요. 합격 데이터를 기여해 크레딧을 받을 수 있어요."); return; }
+      credits -= 10;
+      persistPrototype();
+      const creditLabel = document.querySelector(".credit-cost");
+      if (creditLabel) creditLabel.textContent = `${credits} C`;
+      const content = document.getElementById("chat-content");
+      const message = document.createElement("div");
+      message.className = "chat-message user";
+      const userText = input.value.trim();
+      const mentionPattern = /@\{([^}]+)\}/g;
+      let lastIndex = 0;
+      for (const match of userText.matchAll(mentionPattern)) {
+        message.append(document.createTextNode(userText.slice(lastIndex, match.index)));
+        const tag = document.createElement("span");
+        tag.className = "chat-mention";
+        tag.textContent = `@${match[1]}`;
+        message.append(tag);
+        lastIndex = match.index + match[0].length;
+      }
+      message.append(document.createTextNode(userText.slice(lastIndex)));
+      content.appendChild(message);
+      const mentionMenu = document.getElementById("mention-menu");
+      if (mentionMenu) { mentionMenu.hidden = true; mentionMenu.replaceChildren(); }
+      input.value = "";
+      const reply = document.createElement("div");
+      reply.className = "chat-message";
+      reply.textContent = "참조한 문서 내용을 포함해 답변을 준비했어요. 실제 AI 응답은 백엔드 연결 후 제공됩니다.";
+      content.appendChild(reply);
+      content.scrollTop = content.scrollHeight;
+      showToast("목업 AI 응답이 도착했어요. 10 크레딧을 사용했어요.");
+    }
+
+    function renderDashboard() {
+      crumb.textContent = "AI 분석 리포트";
+      crumbDetail.textContent = "　/　 네이버 · 서비스 기획";
+      pageContent.innerHTML = `<div class="content">
+        <div class="secondary-title"><div><div class="eyebrow">네이버 · 서비스 기획</div><h1>AI 분석 리포트</h1><p style="color:var(--muted);font-size:11px;margin:7px 0 0">작성 진척도와 유사 지원자 사례</p></div><button class="button primary" id="refresh-analysis">분석 리포트 업데이트　·　100 C</button></div>
+        <div class="dashboard-stats"><div class="card dashboard-stat"><div class="stat-top">작성 진척도</div><div class="stat-value">76<small> / 100</small></div><div class="stat-change">지난 분석보다 +8점</div></div><div class="card dashboard-stat"><div class="stat-top">마감까지</div><div class="stat-value">D-3</div><div class="stat-change" style="color:#d1843a">10월 30일 마감</div></div><div class="card dashboard-stat"><div class="stat-top">프로필 완성도</div><div class="stat-value">78<small>%</small></div><div class="stat-change">경험을 더하면 정확도가 올라가요</div></div><div class="card dashboard-stat"><div class="stat-top">유사 지원자</div><div class="stat-value">20<small> 명 분석</small></div><div class="stat-change">합격 5명 · 불합격 5명 비교</div></div></div>
+        <div class="analysis-grid"><section class="card analysis-card"><div class="card-title">JEV 지원서 준비도</div><div class="card-description">문항 답변과 프로필 기반 종합 진척도</div><div class="score-wrap"><div class="score-ring"><div class="score-center"><b>76</b><small>점 / 100</small></div></div><div class="score-notes"><div class="score-note"><b>경험 구체성</b><span>좋아요 · 수치 성과를 보완해 보세요</span></div><div class="score-note"><b>직무 적합도</b><span>높음 · 기획 경험이 잘 연결돼요</span></div><div class="score-note"><b>답변 완성도</b><span>보통 · 결과 문장을 더해주세요</span></div></div></div><button class="button subtle small" data-go="workspace">자소서 이어서 작성하기 →</button></section>
+        <section class="card analysis-card"><div class="card-title">AI가 찾은 나의 포인트</div><div class="card-description">비슷한 경험과 직무의 합격 사례를 참고했어요.</div><div style="margin-top:15px"><div class="insight"><b><span style="color:#258a6a;margin-right:6px">↑</span>사용자 관점의 문제 정의</b><p>합격자들은 고객의 목소리에서 문제를 발견한 과정을 구체적으로 설명했어요. 인터뷰 경험이 강점이에요.</p></div><div class="insight"><b><span style="color:#db9851;margin-right:6px">＋</span>성과를 수치로 표현하기</b><p>결과를 보여주는 구체적인 숫자나 사용자 반응을 추가하면 경험의 영향력이 더 분명해져요.</p></div></div></section></div>
+        <section class="card match-card"><div class="card-head" style="padding:0 0 12px"><div><div class="card-title">비슷한 지원자 사례</div><div class="card-description">익명화된 유사 지원서 사례를 참고한 분석입니다.</div></div><span style="color:#aaaaba;font-size:9px">유사도순</span></div>
+          ${[["프로덕트 기획 · IT 기업","합격",92],["서비스 기획 · 플랫폼","합격",88],["UX 기획 · IT 기업","불합격",84]].map(item => `<div class="match-row"><div class="avatar" style="width:28px;height:28px;font-size:9px">익명</div><div><div class="project-name">${item[0]}</div><div class="project-meta">경영학과 · 동아리 서비스 기획 경험</div></div><span class="status-tag ${item[1]==="불합격"?"fail":""}">${item[1]}</span><div class="match-score">${item[2]}% 유사</div></div>`).join("")}
+        </section></div>`;
+      document.getElementById("refresh-analysis").addEventListener("click", () => showToast("목업 분석 리포트예요. 크레딧은 차감되지 않았어요."));
+      bindPageActions();
+    }
+
+    function renderCollect() {
+      crumb.textContent = "합격 데이터 기여";
+      crumbDetail.textContent = "";
+      pageContent.innerHTML = `<div class="content">
+        <div class="secondary-title"><div><div class="eyebrow">데이터 기여</div><h1>지난 지원 결과 등록</h1><p style="color:var(--muted);font-size:11px;margin:7px 0 0">자기소개서와 합격 여부를 등록하면 500 크레딧을 적립합니다.</p></div></div>
+        <section class="card form-card"><div class="card-title">지난 지원 결과 등록하기</div><div class="card-description">개인 식별 정보는 분석 전에 익명화돼요.</div>
+          <form id="contribution-form"><div class="form-field"><label for="contrib-company">지원 기업</label><input id="contrib-company" required placeholder="예: B기업"></div><div class="form-field"><label for="contrib-role">지원 직무</label><input id="contrib-role" required placeholder="예: 마케팅 인턴"></div>
+          <div class="form-field"><label>최종 결과</label><div class="outcome-options"><button class="outcome-option selected" type="button" data-outcome="합격">✓ 합격</button><button class="outcome-option" type="button" data-outcome="불합격">불합격</button></div><input type="hidden" id="contrib-outcome" value="합격"></div>
+          <div class="form-field"><label for="contrib-essay">자기소개서 내용</label><textarea id="contrib-essay" required minlength="50" placeholder="작성했던 자기소개서 내용을 붙여넣어 주세요. (최소 50자)"></textarea><div class="form-hint">이름, 연락처 등 개인정보가 포함되지 않도록 확인해 주세요.</div></div>
+          <div class="reward-banner"><span>데이터 기여 리워드</span><strong>✦　+500 크레딧</strong></div>
+          <div style="display:flex;justify-content:flex-end;margin-top:18px"><button class="button primary" type="submit">안전하게 기여하기　→</button></div></form>
+        </section>
+      </div>`;
+      document.querySelectorAll(".outcome-option").forEach(button => button.addEventListener("click", () => {
+        document.querySelectorAll(".outcome-option").forEach(option => option.classList.remove("selected"));
+        button.classList.add("selected");
+        document.getElementById("contrib-outcome").value = button.dataset.outcome;
+      }));
+      document.getElementById("contribution-form").addEventListener("submit", event => {
+        event.preventDefault();
+        credits += 500;
+        persistPrototype();
+        showToast(`목업 데이터가 등록되었어요. 보유 크레딧 ${credits.toLocaleString("ko-KR")} C`);
+        event.currentTarget.reset();
+      });
+    }
+
+    function renderProfile() {
+      crumb.textContent = "내 프로필 & 자료";
+      crumbDetail.textContent = "";
+      pageContent.innerHTML = `<div class="content"><div class="secondary-title"><div><div class="eyebrow">내 계정</div><h1>프로필 관리</h1><p style="color:var(--muted);font-size:11px;margin:7px 0 0">학력, 경험, 증빙 자료</p></div><button class="button primary" id="edit-profile">프로필 수정</button></div>
+        <div class="grid"><div class="column"><section class="card profile-card"><div class="profile-top"><div class="profile-pic" style="width:62px;height:62px;font-size:20px">민</div><div><div class="profile-name" style="font-size:16px">김민서</div><div class="profile-detail">서울대학교 · 경영학과 · 4학년</div><div class="profile-detail">관심 직무　서비스 기획 · 프로덕트 매니저</div></div></div></section>
+          <section class="card"><div class="card-head"><div><div class="card-title">경험 및 활동</div><div class="card-description">프로필에 저장된 경험</div></div><button class="text-link" id="add-experience">＋ 추가하기</button></div><div class="doc-list"><div class="doc-row"><div class="file-icon doc">01</div><div><div class="file-name">교내 창업 동아리 · 서비스 기획</div><div class="file-sub">2024.03 – 2025.02 · 사용자 인터뷰 및 프로토타입 제작</div></div></div><div class="doc-row"><div class="file-icon doc">02</div><div><div class="file-name">마케팅 공모전 · 장려상</div><div class="file-sub">2024.08 · 팀 프로젝트 리서치 리드</div></div></div></div></section>
+          <section class="card"><div class="card-head"><div><div class="card-title">내 증빙 자료</div><div class="card-description">프로젝트에 필요한 자료만 선택해 가져갈 수 있어요.</div></div><button class="text-link" id="add-file">＋ 자료 업로드</button></div><div class="doc-list"><div class="doc-row"><div class="file-icon">PDF</div><div><div class="file-name">이력서_김민서.pdf</div><div class="file-sub">1.2 MB · 2025년 10월 24일</div></div><button class="file-more">···</button></div><div class="doc-row"><div class="file-icon">PDF</div><div><div class="file-name">서비스기획_포트폴리오.pdf</div><div class="file-sub">4.8 MB · 2025년 10월 21일</div></div><button class="file-more">···</button></div><div class="doc-row"><div class="file-icon doc">DOC</div><div><div class="file-name">대외활동_경험정리.docx</div><div class="file-sub">248 KB · 2025년 10월 18일</div></div><button class="file-more">···</button></div></div></section></div>
+          <aside class="column right-column"><section class="card side-card"><div class="side-heading"><strong>프로필 완성도</strong><span style="color:var(--purple);font-size:12px;font-weight:700">78%</span></div><div class="profile-progress"><span></span></div><button class="button subtle small" id="complete-profile">프로필 완성하기 →</button></section></aside>
+        </div></div>`;
+      ["edit-profile","add-experience","add-file","complete-profile"].forEach(id => document.getElementById(id).addEventListener("click", () => showToast("프로필 관리 기능은 목업 화면이에요.")));
+    }
+
+    function bindPageActions() {
+      const newProject = document.getElementById("new-project");
+      if (newProject) newProject.addEventListener("click", openProjectModal);
+      document.querySelectorAll("[data-go]").forEach(button => button.addEventListener("click", () => navigate(button.dataset.go)));
+      document.querySelectorAll(".open-workspace").forEach(button => button.addEventListener("click", () => {
+        const project = userProjects.find(item => item.id === button.dataset.projectId);
+        if (project) activeProject = project;
+        else {
+          const seed = projectRows[Number(button.dataset.seedProject)] || projectRows[0];
+          activeProject = { id: `seed-${button.dataset.seedProject}`, company: seed.company.split(" · ")[0], position: seed.name, deadline: "", essay: savedPrototype.seedEssay || "" };
+        }
+        persistPrototype();
+        navigate("workspace");
+      }));
+      const all = document.getElementById("all-projects");
+      if (all) all.addEventListener("click", () => showToast("진행 중인 프로젝트를 확인하고 있어요."));
+    }
+
+    function navigate(page) {
+      activePage = page;
+      document.querySelectorAll(".nav-item").forEach(item => item.classList.toggle("active", item.dataset.page === page));
+      if (page === "home") renderHome();
+      if (page === "workspace") renderWorkspace();
+      if (page === "dashboard") renderDashboard();
+      if (page === "collect") renderCollect();
+      if (page === "profile") renderProfile();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    document.querySelectorAll(".nav-item").forEach(item => item.addEventListener("click", () => navigate(item.dataset.page)));
+    const modal = document.getElementById("project-modal");
+    function openProjectModal() { modal.classList.add("open"); document.getElementById("company").focus(); }
+    function closeProjectModal() { modal.classList.remove("open"); }
+    document.querySelectorAll(".close-modal,.cancel-modal").forEach(button => button.addEventListener("click", closeProjectModal));
+    modal.addEventListener("click", event => { if (event.target === modal) closeProjectModal(); });
+    document.addEventListener("keydown", event => { if (event.key === "Escape") closeProjectModal(); });
+    document.getElementById("project-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const project = {
+        id: crypto.randomUUID(),
+        company: document.getElementById("company").value.trim(),
+        position: document.getElementById("position").value.trim(),
+        deadline: document.getElementById("deadline").value,
+        essay: "",
+        progress: 0,
+        rewarded: false
+      };
+      userProjects.unshift(project);
+      activeProject = project;
+      persistPrototype();
+      closeProjectModal();
+      event.currentTarget.reset();
+      navigate("workspace");
+      showToast("프로젝트를 만들었어요. 자기소개서를 작성해 보세요.");
+    });
+
+    renderHome();
+  </script>
+</body>
+</html>
